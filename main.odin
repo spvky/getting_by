@@ -2,6 +2,7 @@ package getting_by
 
 import rl "vendor:raylib"
 import l "core:math/linalg"
+import mu "vendor:microui"
 import "core:fmt"
 
 WINDOW_WIDTH ::1600
@@ -32,6 +33,15 @@ interpolate_vector :: proc(world: World, vector: Vec3) -> Vec3 {
 }
 
 main :: proc() {
+	// Parse command line arguments
+	opt: Options
+	parse_command_line_arguments(&opt)
+
+	// Set up the micro ui context for the level editor
+	ctx := new(mu.Context)
+	defer free(ctx)
+	mu.init(ctx)
+
 	rl.InitWindow(WINDOW_WIDTH,WINDOW_HEIGHT, "Getting By")
 
 	defer rl.CloseWindow()
@@ -51,6 +61,9 @@ main :: proc() {
 	rt:= rl.LoadRenderTexture(RENDER_WIDTH,RENDER_HEIGHT)
 
 	for !rl.WindowShouldClose() {
+		if opt.editor {
+			display_editor_window(ctx)
+		}
 		frametime:= rl.GetFrameTime()
 		movement_vector: Vec3
 		if rl.IsKeyDown(.W) {
@@ -75,7 +88,9 @@ main :: proc() {
 		rl.BeginMode3D(world.camera)
 		rl.ClearBackground(rl.WHITE)
 
-		rl.DrawGrid(10,1)
+		if opt.editor {
+			rl.DrawGrid(10,1)
+		}
 		rl.DrawCube(a.translation, 2,2,2,rl.RED)
 
 		rl.EndMode3D()
