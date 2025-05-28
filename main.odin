@@ -26,8 +26,7 @@ extend :: proc(v: Vec3, w: f32) -> [4]f32 {
 
 interpolate_vector :: proc(world: World, vector: Vec3) -> Vec3 {
 	camera_matrix:= Matrix(rl.GetCameraMatrix(world.camera))
-	target_matrix:= l.inverse(camera_matrix)
-	r: [4]f32 = extend(vector, 1) * target_matrix
+	r: [4]f32 = extend(vector, 1) * camera_matrix
 	final: Vec3 ={r.x,0,r.z}
 	return l.normalize(final)
 }
