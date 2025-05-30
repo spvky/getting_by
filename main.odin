@@ -28,6 +28,7 @@ main :: proc() {
 	world:= World {
 		camera = camera
 	}
+	append(&world.scene.entities,Entity{rotation = 0})
 
 	load_models()
 
@@ -54,7 +55,6 @@ main :: proc() {
 			rl.DrawGrid(10,1)
 		}
 		render_entities(world)
-		render_player(world)
 
 		// rl.DrawCube(a.translation, 2,2,2,rl.RED)
 

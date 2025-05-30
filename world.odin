@@ -1,10 +1,11 @@
 package getting_by
 
+import "core:slice"
+import "core:fmt"
 import rl "vendor:raylib"
 
 Scene :: struct {
-	player: Entity,
-	entities: #soa [dynamic]Entity
+	entities: [dynamic]Entity
 }
 
 World :: struct {
@@ -12,3 +13,4 @@ World :: struct {
 	camera_angle: f32,
 	scene: Scene,
 }
+
