@@ -5,15 +5,17 @@ import "core:fmt"
 import rl "vendor:raylib"
 
 Scene :: struct {
-	entities: [dynamic]Entity
+	entities: [dynamic]Entity,
+	static_entities: [dynamic]StaticEntity
 }
 
 World :: struct {
-	using camera: rl.Camera,
+	camera: rl.Camera,
 	camera_angle: f32,
 	scene: Scene,
 }
 
 cleanup_scene :: proc(world: World) {
 	delete(world.scene.entities)
+	delete(world.scene.static_entities)
 }

@@ -7,8 +7,8 @@ import "core:fmt"
 
 WINDOW_WIDTH ::1920
 WINDOW_HEIGHT :: 1080
-RENDER_WIDTH :: 480
-RENDER_HEIGHT :: 320
+RENDER_WIDTH :: 600
+RENDER_HEIGHT :: 450
 
 main :: proc() {
 	// Parse command line arguments
@@ -29,6 +29,7 @@ main :: proc() {
 		camera = camera
 	}
 	append(&world.scene.entities,Entity{rotation = 0})
+	append(&world.scene.static_entities, StaticEntity{translation = {0,-5,0}, size = {10,1,10}})
 
 	load_models()
 
@@ -56,7 +57,6 @@ main :: proc() {
 		}
 		render_entities(world)
 
-		// rl.DrawCube(a.translation, 2,2,2,rl.RED)
 
 		rl.EndMode3D()
 		rl.EndTextureMode()
