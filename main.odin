@@ -66,4 +66,5 @@ main :: proc() {
 		rl.EndDrawing()
 	}
 	delete(model_index)
+	cleanup_scene(world)
 }

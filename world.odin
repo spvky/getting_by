@@ -14,3 +14,6 @@ World :: struct {
 	scene: Scene,
 }
 
+cleanup_scene :: proc(world: World) {
+	delete(world.scene.entities)
+}
