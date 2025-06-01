@@ -54,12 +54,12 @@ main :: proc() {
 		rl.BeginTextureMode(rt)
 
 		rl.BeginMode3D(world.camera)
-		rl.ClearBackground(rl.WHITE)
+		rl.ClearBackground(rl.Color{255,229,180,255})
 
 
 		// Editor Render
 		if opt.editor {
-			rl.DrawGrid(10,1)
+			editor_draw(world)
 		}
 		draw_entities(world)
 
