@@ -1,5 +1,7 @@
 package getting_by
 
+import "core:testing"
+import "core:math"
 import l "core:math/linalg"
 import rl "vendor:raylib"
 

@@ -20,15 +20,6 @@ editor_camera_movement :: proc(world: ^World) {
 	mouse_delta:= rl.GetMouseDelta()
 	frametime:= rl.GetFrameTime()
 
-	// if rl.IsKeyPressed(.Z) {
-	// 	switch editor_state.camera_mode {
-	// 		case .Navigation:
-	// 			editor_state.camera_mode = .Placement
-	// 		case .Placement:
-	// 			editor_state.camera_mode = .Navigation
-	// 	}
-	// }
-
 	switch editor_state.camera_mode {
 		case .Placement:
 			world.camera.up = {0,1,0}
@@ -41,6 +32,8 @@ editor_camera_movement :: proc(world: ^World) {
 			if rl.IsKeyDown(.S) {raw_movement.x -= 1}
 			if rl.IsKeyDown(.A) {raw_movement.y -= 1}
 			if rl.IsKeyDown(.D) {raw_movement.y += 1}
+			if rl.IsKeyDown(.Q) {raw_movement.z += 1}
+			if rl.IsKeyDown(.E) {raw_movement.z -= 1}
 			if raw_movement != {0,0,0} {
 				scaled_vec:= l.normalize(raw_movement) * 10 * frametime
 				rl.UpdateCameraPro(&world.camera,scaled_vec, {0,0,0}, 0)
@@ -55,9 +48,24 @@ editor_update :: proc(world: ^World) {
 	editor_camera_movement(world)
 }
 
+placement_debug :: proc(world: World) {
+	snap_height:= math.round(world.camera.position.y - 10.0)
+	stw_ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
+	ray_collision:= rl.GetRayCollisionQuad(stw_ray,
+		{-100,snap_height,-100},
+		{100,snap_height,-100},
+		{100,snap_height,100},
+		{-100,snap_height,100},
+	)
+	cursor_point:= ray_collision.point
+
+	rl.DrawSphere(cursor_point, 0.25, rl.Color{255,0,0,122})
+}
+
 
 custom_grid :: proc(world: World) {
-	center:= Vec3{0,world.camera.position.y - 10,0}
+	snapped_height:= math.round(world.camera.position.y - 10.0)
+	center:= Vec3{0,snapped_height,0}
 	grid_color:= rl.Color{255,255,255,122}
 	iter:= 5
 	f_iter:= f32(iter)
@@ -94,6 +102,7 @@ custom_grid :: proc(world: World) {
 
 editor_draw :: proc(world: World) {
 	custom_grid(world)
+	placement_debug(world)
 	if rl.GuiButton(
 		{1700,-100, 200, 500},
 		"Nice Button"
