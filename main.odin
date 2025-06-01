@@ -26,7 +26,9 @@ main :: proc() {
 	}
 
 	world:= World {
-		camera = camera
+		camera = camera,
+		possible_collision_pairs = make([dynamic]int, allocator = context.temp_allocator),
+		actual_collision_pairs = make([dynamic]int, allocator = context.temp_allocator)
 	}
 	append(&world.scene.entities,Entity{rotation = 0})
 	append(&world.scene.static_entities, StaticEntity{translation = {0,-5,0}, size = {10,1,10}})
@@ -44,7 +46,11 @@ main :: proc() {
 		}
 		frametime:= rl.GetFrameTime()
 
-		player_movement(&world, frametime)
+		// Actor updates
+		update_player(&world, frametime)
+		update_entities(&world)
+
+
 		rl.BeginTextureMode(rt)
 
 		rl.BeginMode3D(world.camera)
@@ -55,7 +61,7 @@ main :: proc() {
 		if opt.editor {
 			rl.DrawGrid(10,1)
 		}
-		render_entities(world)
+		draw_entities(world)
 
 
 		rl.EndMode3D()
@@ -64,7 +70,9 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.DrawTexturePro(rt.texture,{width = RENDER_WIDTH, height = -RENDER_HEIGHT}, {width = WINDOW_WIDTH, height = WINDOW_HEIGHT}, {0,0}, 0, rl.WHITE)
 		rl.EndDrawing()
+		free_all(context.temp_allocator)
 	}
+
 	delete(model_index)
 	cleanup_scene(world)
 }

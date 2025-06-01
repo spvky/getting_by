@@ -3,7 +3,6 @@ package getting_by
 import "core:fmt"
 import rl "vendor:raylib"
 
-
 get_player :: proc(world: World) -> (player: ^Entity, ok: bool) {
 	for &entity in world.scene.entities {
 		if entity.tag == .Player {
@@ -32,8 +31,14 @@ player_movement :: proc(world: ^World, frametime: f32) {
 		
 		if movement_vector != {0,0,0} {
 			interpolated_vector:= interpolate_vector(world^,movement_vector)
-			player.translation += frametime *  interpolated_vector
+			player.velocity = frametime *  interpolated_vector
+		} else {
+			player.velocity = Vec3{}
 		}
 	}
+}
+
+update_player :: proc(world: ^World, frametime: f32) {
+	player_movement(world, frametime)
 }
 

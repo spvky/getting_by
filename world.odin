@@ -12,7 +12,14 @@ Scene :: struct {
 World :: struct {
 	camera: rl.Camera,
 	camera_angle: f32,
-	scene: Scene,
+	using scene: Scene,
+	using physics_world: PhysicsWorld,
+}
+
+PhysicsWorld :: struct {
+	gravity: Vec3,
+	possible_collision_pairs: [dynamic]int,
+	actual_collision_pairs: [dynamic]int,
 }
 
 cleanup_scene :: proc(world: World) {
