@@ -50,7 +50,6 @@ main :: proc() {
 		update_player(&world, frametime)
 		update_entities(&world)
 
-
 		rl.BeginTextureMode(rt)
 
 		rl.BeginMode3D(world.camera)
@@ -69,6 +68,10 @@ main :: proc() {
 
 		rl.BeginDrawing()
 		rl.DrawTexturePro(rt.texture,{width = RENDER_WIDTH, height = -RENDER_HEIGHT}, {width = WINDOW_WIDTH, height = WINDOW_HEIGHT}, {0,0}, 0, rl.WHITE)
+
+		if opt.editor {
+			editor_ui()
+		}
 		rl.EndDrawing()
 		free_all(context.temp_allocator)
 	}

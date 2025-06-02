@@ -2,11 +2,14 @@ package getting_by
 
 import "core:fmt"
 import "core:math"
+import "core:strings"
+import "core:c"
 import l "core:math/linalg"
 import rl "vendor:raylib"
 
 EditorState :: struct {
 	camera_mode: EditorCameraMode,
+	active_toggle: c.int
 }
 
 EditorCameraMode :: enum {
@@ -49,17 +52,19 @@ editor_update :: proc(world: ^World) {
 }
 
 placement_debug :: proc(world: World) {
-	snap_height:= math.round(world.camera.position.y - 10.0)
-	stw_ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
-	ray_collision:= rl.GetRayCollisionQuad(stw_ray,
-		{-100,snap_height,-100},
-		{100,snap_height,-100},
-		{100,snap_height,100},
-		{-100,snap_height,100},
-	)
-	cursor_point:= ray_collision.point
+	if editor_state.active_toggle == 1 {
+		snap_height:= math.round(world.camera.position.y - 10.0)
+		stw_ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
+		ray_collision:= rl.GetRayCollisionQuad(stw_ray,
+			{-100,snap_height,-100},
+			{100,snap_height,-100},
+			{100,snap_height,100},
+			{-100,snap_height,100},
+		)
+		cursor_point:= ray_collision.point
 
-	rl.DrawSphere(cursor_point, 0.25, rl.Color{255,0,0,122})
+		rl.DrawSphere(cursor_point, 0.25, rl.Color{255,0,0,122})
+	}
 }
 
 
@@ -100,13 +105,28 @@ custom_grid :: proc(world: World) {
 	}
 }
 
+test_box :: proc() {
+	editor_window:= rl.Rectangle{1620,10,250, 800}
+	rl.GuiWindowBox(editor_window, "Some Window")
+	mode_string: cstring
+	switch editor_state.active_toggle {
+		case 0:
+			mode_string = "Select"
+		case 1:
+			mode_string = "Placement"
+		case 2:
+			mode_string = "Secret Case"
+	}
+	rl.DrawText(mode_string, 1350, 200, 20,rl.BLACK)
+	toggle_mode:= rl.GuiToggleGroup({1650, 100, 50,50}, "#068#;#070#;#073#", &editor_state.active_toggle)
+}
+
 editor_draw :: proc(world: World) {
 	custom_grid(world)
 	placement_debug(world)
-	if rl.GuiButton(
-		{1700,-100, 200, 500},
-		"Nice Button"
-		) {
-	}
-	
 }
+
+editor_ui :: proc() {
+	test_box()
+}
+
