@@ -6,7 +6,8 @@ import rl "vendor:raylib"
 
 Scene :: struct {
 	entities: [dynamic]Entity,
-	static_entities: [dynamic]StaticEntity
+	static_entities: [dynamic]StaticEntity,
+	scene_collision: [dynamic]SceneCollider,
 }
 
 World :: struct {

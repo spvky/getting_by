@@ -16,6 +16,10 @@ StaticEntity :: struct {
 	tag: StaticEntityTag
 }
 
+SceneCollider :: struct {
+	points: [dynamic]Vec3
+}
+
 EntityTag :: enum {
 	Player,
 	Desk,
