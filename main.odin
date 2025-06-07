@@ -31,7 +31,7 @@ main :: proc() {
 		actual_collision_pairs = make([dynamic]int, allocator = context.temp_allocator)
 	}
 	append(&world.scene.entities,Entity{rotation = 0})
-	append(&world.scene.static_entities, StaticEntity{translation = {0,-5,0}, size = {10,1,10}})
+	// append(&world.scene.static_entities, StaticEntity{translation = {0,-5,0}, size = {10,1,10}})
 
 	load_models()
 

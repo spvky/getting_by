@@ -9,7 +9,23 @@ import rl "vendor:raylib"
 
 EditorState :: struct {
 	camera_mode: EditorCameraMode,
-	active_toggle: c.int
+	cursor_state: CursorState,
+	active_toggle: c.int,
+	selected_entity: Handle,
+	selected_scene_collider: Maybe(Handle),
+}
+
+CursorState :: union {
+	CursorPlacement,
+	CursorSelection
+}
+
+CursorPlacement :: struct {
+	position: Vec3
+}
+
+CursorSelection :: struct {
+	
 }
 
 EditorCameraMode :: enum {
@@ -17,7 +33,26 @@ EditorCameraMode :: enum {
 	Navigation
 }
 
-editor_state: EditorState
+ColliderEdit :: struct {
+	current_collider: Handle,
+	current_index: int
+}
+
+EntityEdit :: struct {
+	current_entity: Handle,
+}
+
+/// Editor Mode
+// - Collider Edit
+// - Entity Edit
+// - Entity Placement
+// - Collider Placement
+//	Collider Edit
+//	-
+
+editor_state:= EditorState {
+	cursor_state = CursorPlacement{}
+}
 
 editor_camera_movement :: proc(world: ^World) {
 	mouse_delta:= rl.GetMouseDelta()
@@ -49,22 +84,26 @@ editor_camera_movement :: proc(world: ^World) {
 
 editor_update :: proc(world: ^World) {
 	editor_camera_movement(world)
+	editor_placement(world)
+	switch &cs in editor_state.cursor_state {
+		case CursorPlacement:
+			position:= placement_cursor(world^)
+			cs.position = position
+
+		case CursorSelection:
+	}
 }
 
-placement_debug :: proc(world: World) {
-	if editor_state.active_toggle == 1 {
-		snap_height:= math.round(world.camera.position.y - 10.0)
-		stw_ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
-		ray_collision:= rl.GetRayCollisionQuad(stw_ray,
-			{-100,snap_height,-100},
-			{100,snap_height,-100},
-			{100,snap_height,100},
-			{-100,snap_height,100},
-		)
-		cursor_point:= ray_collision.point
-
-		rl.DrawSphere(cursor_point, 0.25, rl.Color{255,0,0,122})
-	}
+placement_cursor :: proc(world: World) -> Vec3 {
+	snap_height:= math.round(world.camera.position.y - 10.0)
+	stw_ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
+	ray_collision:= rl.GetRayCollisionQuad(stw_ray,
+		{-100,snap_height,-100},
+		{100,snap_height,-100},
+		{100,snap_height,100},
+		{-100,snap_height,100},
+	)
+	return ray_collision.point
 }
 
 
@@ -121,9 +160,81 @@ test_box :: proc() {
 	toggle_mode:= rl.GuiToggleGroup({1650, 100, 50,50}, "#068#;#070#;#073#", &editor_state.active_toggle)
 }
 
+draw_placement_cursor :: proc(position: Vec3) {
+	rl.DrawSphere(position, 0.25, rl.Color{255,0,0,122})
+}
+
+// Collider Placement Take 1:
+// 1.Clicking on  the grid sets a vertices
+//	a. Create a new collider instance that contains the vertex
+//	b. The vertex becomes the `Selected object in the editor
+// 2. You can click commit
+//	a. If the collider has 3 or more vertices
+//	b. Calculate the convex hull if there are 5 or more vertices *
+//	c. Save the collider instance to the scene
+// 3. You can click the grid
+//	a. This appends a vertex to the collider, and the new vertex is now selected
+
+editor_placement :: proc(world: ^World) {
+	if rl.IsMouseButtonPressed(.LEFT) {
+		// Check if cursor is in the placement state
+		if c_state, ok := editor_state.cursor_state.(CursorPlacement); ok {
+			// Check if we have an existing handle to a scene collider
+			if handle, h_ok := editor_state.selected_scene_collider.?; h_ok {
+				// If we have a handle, get a pointer the handles object
+				collider_ptr:= ha_get_ptr(world.scene_collision,handle)
+				append(&collider_ptr.points, c_state.position)
+			} else {
+				sc: SceneCollider
+				append(&sc.points, c_state.position)
+				collider_handle :=  ha_add(&world.scene_collision, sc)
+				editor_state.selected_scene_collider = collider_handle
+			}
+		}
+	}
+}
+
+editor_picking :: proc(world: World) {
+	if editor_state.active_toggle == 0 {
+		// ray:= rl.GetScreenToWorldRay(rl.GetMousePosition(), world.camera)
+	}
+}
+
+editor_style :: proc() {
+	a: rl.GuiControl
+	rl.GuiSetStyle(.TOGGLE,1,0x024658ff)
+	// rl.GuiSetStyle(.TOGGLE,2,0x2fffffff)
+	rl.GuiSetStyle(.TOGGLE,2,0xffffff)
+	// rl.GuiLoadStyle()
+}
+
 editor_draw :: proc(world: World) {
-	custom_grid(world)
-	placement_debug(world)
+	editor_style()
+	switch editor_state.active_toggle {
+		case 0:
+		case 1:
+			custom_grid(world)
+		case 2:
+	}
+
+	switch cs in editor_state.cursor_state {
+		case CursorSelection:
+		case CursorPlacement:
+			draw_placement_cursor(cs.position)
+	}
+
+	scene_collider_iter := ha_make_iter(world.scene_collision)
+	for sc in ha_iter_ptr(&scene_collider_iter) {
+		length := len(sc.points)
+		for point,i in sc.points {
+			if length > 1 && i+1 < length {
+				rl.DrawLine3D(point, sc.points[i+1], rl.BLUE)
+			}
+			rl.DrawSphere(point, 0.5, rl.BLUE)
+		}
+		rl.DrawLine3D(sc.points[length - 1], sc.points[0], rl.BLUE)
+	}
+
 }
 
 editor_ui :: proc() {

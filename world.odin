@@ -6,8 +6,7 @@ import rl "vendor:raylib"
 
 Scene :: struct {
 	entities: [dynamic]Entity,
-	static_entities: [dynamic]StaticEntity,
-	scene_collision: [dynamic]SceneCollider,
+	scene_collision: Handle_Array(SceneCollider, Handle),
 }
 
 World :: struct {
@@ -25,5 +24,5 @@ PhysicsWorld :: struct {
 
 cleanup_scene :: proc(world: World) {
 	delete(world.scene.entities)
-	delete(world.scene.static_entities)
+	ha_delete(world.scene.scene_collision)
 }

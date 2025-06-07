@@ -2,6 +2,9 @@ package getting_by
 
 import rl "vendor:raylib"
 
+// EntityHandle :: distinct Handle
+// SceneColliderHandle :: distinct Handle
+
 Entity :: struct {
 	using translation: Vec3,
 	velocity: Vec3,
@@ -9,14 +12,8 @@ Entity :: struct {
 	tag: EntityTag
 }
 
-StaticEntity :: struct {
-	using translation: Vec3,
-	size: Vec3,
-	rotation: f32,
-	tag: StaticEntityTag
-}
-
 SceneCollider :: struct {
+	handle: Handle,
 	points: [dynamic]Vec3
 }
 
@@ -44,13 +41,13 @@ draw_entities :: proc(world: World) {
 		}
 	}
 
-	for entity in world.static_entities {
-			switch entity.tag {
-			case .Block:
-			rl.DrawCubeV(entity.translation, entity.size,rl.GRAY)
+	// for entity in world.static_entities {
+	// 		switch entity.tag {
+	// 		case .Block:
+	// 		rl.DrawCubeV(entity.translation, entity.size,rl.GRAY)
 			
-		}
-	}
+	// 	}
+	// }
 }
 
 update_entities :: proc(world: ^World) {
