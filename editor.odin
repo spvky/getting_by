@@ -223,16 +223,43 @@ editor_draw :: proc(world: World) {
 			draw_placement_cursor(cs.position)
 	}
 
+	two_closest_points :: proc(index: int, points: [dynamic]Vec3) -> (a,b: Vec3, a_ok, b_ok: bool) {
+		i1,i2: int
+		i1_dist, i2_dist: f32 = 1000.0, 1000.0
+		for p, i in points {
+			if i == index do continue
+			dist:= f32(l.distance(points[index],p))
+			if dist < i2_dist {
+				i2 = i
+				i2_dist = dist
+				if i2_dist < i1_dist {
+					temp_i:= i2
+					temp:= i2_dist
+					i2_dist = i1_dist
+					i2 = i1
+					i1_dist = temp
+					i1 = temp_i
+				}
+			}
+		}
+		a,b = points[i1], points[i2]
+		a_ok = i1_dist != 1000.0
+		b_ok = i2_dist != 1000.0
+		return
+	}
+
 	scene_collider_iter := ha_make_iter(world.scene_collision)
 	for sc in ha_iter_ptr(&scene_collider_iter) {
 		length := len(sc.points)
 		for point,i in sc.points {
 			if length > 1 && i+1 < length {
 				rl.DrawLine3D(point, sc.points[i+1], rl.BLUE)
+				a,b,a_ok,b_ok := two_closest_points(i, sc.points)
+				if a_ok do rl.DrawLine3D(point, a, rl.BLUE)
+				if b_ok do rl.DrawLine3D(point, b, rl.BLUE)
 			}
 			rl.DrawSphere(point, 0.5, rl.BLUE)
 		}
-		rl.DrawLine3D(sc.points[length - 1], sc.points[0], rl.BLUE)
 	}
 
 }
